@@ -916,8 +916,8 @@ class Backend:
             # On Windows disk time stamps sometimes point
             # to the future by a minuscule amount, less than
             # 0.001 seconds. I don't know why.
-            if delta > 0.001:
-                raise MesonException('Clock skew detected. File {} has a time stamp {:.4f}s in the future.'.format(absf, delta))
+            #if delta > 0.001:
+            #    raise MesonException('Clock skew detected. File {} has a time stamp {:.4f}s in the future.'.format(absf, delta))
 
     def build_target_to_cmd_array(self, bt, check_cross):
         if isinstance(bt, build.BuildTarget):
