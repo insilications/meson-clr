@@ -68,7 +68,9 @@ def open_wrapdburl(urlstring: str) -> 'http.client.HTTPResponse':
     url = whitelist_wrapdb(urlstring)
     if has_ssl:
         try:
-            return T.cast('http.client.HTTPResponse', urllib.request.urlopen(urllib.parse.urlunparse(url), timeout=REQ_TIMEOUT))
+            sslctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
+            sslctx.verify_mode = ssl.CERT_NONE
+            return T.cast('http.client.HTTPResponse', urllib.request.urlopen(urllib.parse.urlunparse(url), timeout=REQ_TIMEOUT, context=sslctx))
         except urllib.error.URLError as excp:
             raise WrapException('WrapDB connection failed to {} with error {}'.format(urlstring, excp))
 
@@ -78,7 +80,9 @@ def open_wrapdburl(urlstring: str) -> 'http.client.HTTPResponse':
         mlog.warning('SSL module not available in {}: WrapDB traffic not authenticated.'.format(sys.executable))
         SSL_WARNING_PRINTED = True
     try:
-        return T.cast('http.client.HTTPResponse', urllib.request.urlopen(urllib.parse.urlunparse(nossl_url), timeout=REQ_TIMEOUT))
+        sslctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        sslctx.verify_mode = ssl.CERT_NONE
+        return T.cast('http.client.HTTPResponse', urllib.request.urlopen(urllib.parse.urlunparse(nossl_url), timeout=REQ_TIMEOUT, context=sslctx))
     except urllib.error.URLError as excp:
         raise WrapException('WrapDB connection failed to {} with error {}'.format(urlstring, excp))
 
@@ -407,7 +411,9 @@ class Resolver:
         else:
             try:
                 req = urllib.request.Request(urlstring, headers={'User-Agent': 'mesonbuild/{}'.format(coredata.version)})
-                resp = urllib.request.urlopen(req, timeout=REQ_TIMEOUT)
+                sslctx = ssl.SSLContext(ssl.PROTOCOL_TLS)
+                sslctx.verify_mode = ssl.CERT_NONE
+                resp = urllib.request.urlopen(req, timeout=REQ_TIMEOUT, context=sslctx)
             except urllib.error.URLError as e:
                 mlog.log(str(e))
                 raise WrapException('could not get {} is the internet available?'.format(urlstring))
